@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://rishikeshhedaoo.github.io/sitemap.xml

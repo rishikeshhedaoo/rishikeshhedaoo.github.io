@@ -7,7 +7,9 @@ export default function CenterText() {
   const [isHovered, setIsHovered] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
   const [showInitialColor, setShowInitialColor] = useState(false);
-  const textRef = useRef<HTMLDivElement>(null);
+  const [circleSize, setCircleSize] = useState(220);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     // After writing animation, show color fill once
@@ -21,9 +23,27 @@ export default function CenterText() {
       setAnimationComplete(true);
     }, 4200); // 2.5s writing + 1.7s color display (reduced from 2.5s)
 
+    // Update circle size based on screen size
+    const updateCircleSize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setCircleSize(120); // Small screens
+      } else if (width < 1024) {
+        setCircleSize(180); // Medium screens
+      } else if (width < 1440) {
+        setCircleSize(220); // Large screens
+      } else {
+        setCircleSize(280); // Extra large screens
+      }
+    };
+
+    updateCircleSize();
+    window.addEventListener('resize', updateCircleSize);
+
     return () => {
       clearTimeout(colorTimer);
       clearTimeout(interactiveTimer);
+      window.removeEventListener('resize', updateCircleSize);
     };
   }, []);
 
@@ -56,18 +76,25 @@ export default function CenterText() {
 
   return (
     <div 
-      className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[900px] text-center z-20 pointer-events-auto cursor-pointer uppercase select-none"
-      ref={textRef}
+      className="fixed inset-0 flex items-center justify-center z-20 pointer-events-none"
       style={{
-        fontFamily: "'Audiowide', 'Orbitron', sans-serif",
-        fontWeight: 400,
-        fontSize: 'clamp(50px, 15vw, 200px)',
-        letterSpacing: '0.15em',
-        lineHeight: '1',
+        padding: 'clamp(1rem, 5vw, 3rem)',
       }}
     >
+      <div 
+        ref={containerRef}
+        className="pointer-events-auto cursor-pointer select-none w-full max-w-[90vw] uppercase"
+        style={{
+          fontFamily: "'Audiowide', 'Orbitron', sans-serif",
+          fontWeight: 400,
+          fontSize: 'clamp(3rem, 12vw, 12rem)',
+          letterSpacing: '0.15em',
+          lineHeight: '1',
+          textAlign: 'center',
+        }}
+      >
       <div className="relative overflow-hidden">
-        <span className="relative inline-block">
+        <span className="relative inline-block" ref={textRef}>
           {/* Base text with border only - no color inside */}
           <span 
             className="relative inline-block"
@@ -102,8 +129,8 @@ export default function CenterText() {
               style={{
                 backgroundImage: 'linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 33%, #45b7d1 66%, #f7b731 100%)',
                 backgroundSize: '200% 100%',
-                maskImage: isHovered ? `radial-gradient(circle 220px at ${mousePos.x}px ${mousePos.y}px, black, transparent 55%)` : 'radial-gradient(circle 0px at -1000px -1000px, black, transparent)',
-                WebkitMaskImage: isHovered ? `radial-gradient(circle 220px at ${mousePos.x}px ${mousePos.y}px, black, transparent 55%)` : 'radial-gradient(circle 0px at -1000px -1000px, black, transparent)',
+                maskImage: isHovered ? `radial-gradient(circle ${circleSize}px at ${mousePos.x}px ${mousePos.y}px, black, transparent 55%)` : 'radial-gradient(circle 0px at -1000px -1000px, black, transparent)',
+                WebkitMaskImage: isHovered ? `radial-gradient(circle ${circleSize}px at ${mousePos.x}px ${mousePos.y}px, black, transparent 55%)` : 'radial-gradient(circle 0px at -1000px -1000px, black, transparent)',
                 transition: 'none',
               }}
             >
@@ -111,6 +138,7 @@ export default function CenterText() {
             </span>
           )}
         </span>
+      </div>
       </div>
       
       <style jsx>{`

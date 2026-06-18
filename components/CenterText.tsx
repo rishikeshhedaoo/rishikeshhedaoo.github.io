@@ -24,6 +24,7 @@ export default function CenterText({ scrollProgress = 0, onAnimationComplete }: 
     fontFamily: "'Audiowide', 'Orbitron', sans-serif",
     fontWeight: 400,
     letterSpacing: '0.15em',
+    textTransform: 'none',
   });
   const wordRef = useRef<HTMLDivElement>(null);
   const baseTextRef = useRef<HTMLSpanElement>(null);
@@ -240,6 +241,7 @@ export default function CenterText({ scrollProgress = 0, onAnimationComplete }: 
                       fontSize: textDims.fontSize,
                       fontWeight: textDims.fontWeight,
                       letterSpacing: textDims.letterSpacing,
+                      textTransform: textDims.textTransform,
                     }}
                   >
                     BEHAVE
@@ -258,6 +260,7 @@ export default function CenterText({ scrollProgress = 0, onAnimationComplete }: 
                   fontSize: textDims.fontSize,
                   fontWeight: textDims.fontWeight,
                   letterSpacing: textDims.letterSpacing,
+                  textTransform: textDims.textTransform,
                 }}
               >
                 BEHAVE

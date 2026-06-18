@@ -60,6 +60,7 @@ export default function SteelHoverText({
     fontFamily: "'Audiowide', 'Orbitron', sans-serif",
     fontWeight: 400,
     letterSpacing: '0.1em',
+    textTransform: 'none',
   });
   const wordRef = useRef<HTMLDivElement>(null);
   const baseTextRef = useRef<HTMLElement>(null);
@@ -202,6 +203,7 @@ export default function SteelHoverText({
                   fontSize: textDims.fontSize,
                   fontWeight: textDims.fontWeight,
                   letterSpacing: textDims.letterSpacing,
+                  textTransform: textDims.textTransform,
                 }}
               >
                 {children}
@@ -220,6 +222,7 @@ export default function SteelHoverText({
               fontSize: textDims.fontSize,
               fontWeight: textDims.fontWeight,
               letterSpacing: textDims.letterSpacing,
+              textTransform: textDims.textTransform,
             }}
           >
             {children}

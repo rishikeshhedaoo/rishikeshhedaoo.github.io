@@ -37,6 +37,9 @@ export default function Home() {
     setIsTransitioning(true);
     setTimeout(() => {
       setActiveSection(index);
+      if (index !== 2) {
+        setSelectedService(null);
+      }
       setIsTransitioning(false);
     }, 300);
   };
@@ -318,58 +321,20 @@ export default function Home() {
                         <div style={{ position: 'absolute', top: '60%', right: '8%', width: '3px', height: '3px', borderRadius: '50%', background: 'rgba(107, 114, 128, 0.2)', animation: 'pulse 4s ease-in-out infinite 1s' }} />
                         <div style={{ position: 'absolute', bottom: '25%', left: '12%', width: '2px', height: '2px', borderRadius: '50%', background: 'rgba(107, 114, 128, 0.25)', animation: 'pulse 3.5s ease-in-out infinite 0.5s' }} />
 
-                        {/* Service title with spotlight effect */}
-                        <div
-                          style={{ textAlign: 'center', marginBottom: '3rem', position: 'relative' }}
-                          onMouseMove={(e) => {
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            const x = e.clientX - rect.left;
-                            const y = e.clientY - rect.top;
-                            const overlay = e.currentTarget.querySelector('.title-overlay') as HTMLElement;
-                            if (overlay) {
-                              overlay.style.opacity = '1';
-                              (overlay.style as any).maskImage = `radial-gradient(circle 120px at ${x}px ${y}px, black 0%, transparent 70%)`;
-                              (overlay.style as any).webkitMaskImage = `radial-gradient(circle 120px at ${x}px ${y}px, black 0%, transparent 70%)`;
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            const overlay = e.currentTarget.querySelector('.title-overlay') as HTMLElement;
-                            if (overlay) overlay.style.opacity = '0';
-                          }}
-                        >
-                          {/* Base outlined text */}
-                          <div
+                        {/* Service title with steel hover */}
+                        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                          <SteelHoverText
+                            as="div"
+                            circleSize={120}
                             style={{
                               fontFamily: "'Audiowide', sans-serif",
                               fontSize: 'clamp(1.8rem, 5vw, 2.5rem)',
                               letterSpacing: '0.15em',
-                              WebkitTextStroke: '1.2px rgba(107, 114, 128, 0.7)',
-                              color: 'transparent',
                               marginBottom: '0.5rem',
-                              position: 'relative',
-                              cursor: 'default',
                             }}
                           >
                             {service.title}
-                            {/* Overlay with gradient - revealed by maskImage */}
-                            <span
-                              className="title-overlay"
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                background: 'linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 33%, #45b7d1 66%, #f7b731 100%)',
-                                backgroundSize: '200% 100%',
-                                WebkitBackgroundClip: 'text',
-                                backgroundClip: 'text',
-                                color: 'transparent',
-                                opacity: 0,
-                                transition: 'opacity 0.2s ease',
-                                pointerEvents: 'none',
-                              }}
-                            >
-                              {service.title}
-                            </span>
-                          </div>
+                          </SteelHoverText>
                           <div
                             style={{
                               fontFamily: "'Audiowide', sans-serif",
@@ -459,17 +424,19 @@ export default function Home() {
                                 </div>
 
                                 {/* Step name */}
-                                <div
+                                <SteelHoverText
+                                  strokeWidth="0.5px"
+                                  strokeColor="rgba(107, 114, 128, 0.5)"
+                                  circleSize={50}
                                   style={{
                                     fontFamily: "'Audiowide', sans-serif",
                                     fontSize: '0.6rem',
                                     letterSpacing: '0.1em',
-                                    color: 'rgba(255, 255, 255, 0.5)',
                                     textTransform: 'uppercase',
                                   }}
                                 >
                                   {step.name}
-                                </div>
+                                </SteelHoverText>
                               </div>
                             ))}
                           </div>
@@ -531,50 +498,39 @@ export default function Home() {
                             }}
                             onMouseEnter={(e) => {
                               e.currentTarget.style.paddingLeft = '1rem';
-                              const num = e.currentTarget.querySelector('.svc-num') as HTMLElement;
-                              const title = e.currentTarget.querySelector('.svc-title') as HTMLElement;
-                              if (num) num.style.color = 'rgba(255, 255, 255, 0.8)';
-                              if (title) title.style.color = 'rgba(255, 255, 255, 0.9)';
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.paddingLeft = '0';
-                              const num = e.currentTarget.querySelector('.svc-num') as HTMLElement;
-                              const title = e.currentTarget.querySelector('.svc-title') as HTMLElement;
-                              if (num) {
-                                num.style.color = 'transparent';
-                                (num.style as any).webkitTextStroke = '1px rgba(107, 114, 128, 0.5)';
-                              }
-                              if (title) title.style.color = 'rgba(255, 255, 255, 0.6)';
                             }}
                           >
                             {/* Number - outlined */}
-                            <div
-                              className="svc-num"
+                            <SteelHoverText
+                              strokeWidth="1px"
+                              strokeColor="rgba(107, 114, 128, 0.5)"
+                              circleSize={60}
                               style={{
                                 fontFamily: "'Audiowide', sans-serif",
                                 fontSize: '1.5rem',
-                                WebkitTextStroke: '1px rgba(107, 114, 128, 0.5)',
-                                color: 'transparent',
                                 minWidth: '60px',
-                                transition: 'all 0.3s ease',
                               }}
                             >
                               {service.num}
-                            </div>
+                            </SteelHoverText>
 
                             {/* Title */}
-                            <div
-                              className="svc-title"
-                              style={{
-                                fontFamily: "'Audiowide', sans-serif",
-                                fontSize: 'clamp(0.8rem, 2vw, 1rem)',
-                                letterSpacing: '0.12em',
-                                color: 'rgba(255, 255, 255, 0.6)',
-                                flex: 1,
-                                transition: 'color 0.3s ease',
-                              }}
-                            >
-                              {service.title}
+                            <div style={{ flex: 1 }}>
+                              <SteelHoverText
+                                strokeWidth="1px"
+                                strokeColor="rgba(107, 114, 128, 0.5)"
+                                circleSize={80}
+                                style={{
+                                  fontFamily: "'Audiowide', sans-serif",
+                                  fontSize: 'clamp(0.8rem, 2vw, 1rem)',
+                                  letterSpacing: '0.12em',
+                                }}
+                              >
+                                {service.title}
+                              </SteelHoverText>
                             </div>
 
                             {/* View steps hint */}

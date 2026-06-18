@@ -8,6 +8,7 @@ export interface SteelTextDims {
   fontFamily: string;
   fontWeight: string | number;
   letterSpacing: string;
+  textTransform: string;
 }
 
 function parseLineHeightPx(lineHeight: string, fontSize: number): number {
@@ -56,5 +57,6 @@ export function measureSteelText(
     fontFamily: cs.fontFamily,
     fontWeight: cs.fontWeight,
     letterSpacing: cs.letterSpacing,
+    textTransform: cs.textTransform,
   };
 }

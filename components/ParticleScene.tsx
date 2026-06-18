@@ -1,139 +1,114 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
+
+const GRID_SPACING = 26;
+const BASE_RADIUS = 0.625;
+const MAX_RADIUS = 1.875;
+const HOVER_RADIUS = 190;
+const DOT_OPACITY = 0.4;
+
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
 
 export default function ParticleScene() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: -1000, y: -1000, active: false });
+  const smoothMouseRef = useRef({ x: -1000, y: -1000 });
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const container = containerRef.current;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight,
-      1,
-      4000
-    );
-    camera.position.z = 800;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio || 1);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
+    let animationId = 0;
+    let width = 0;
+    let height = 0;
 
-    const group = new THREE.Group();
-    scene.add(group);
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
 
-    const COUNT = 6000;
-    const positions = new Float32Array(COUNT * 3);
-    for (let i = 0; i < COUNT; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 3000;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 3000;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 3000;
-    }
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      smoothMouseRef.current.x += (mouseRef.current.x - smoothMouseRef.current.x) * 0.12;
+      smoothMouseRef.current.y += (mouseRef.current.y - smoothMouseRef.current.y) * 0.12;
 
-    // add per-point phase and scale for twinkle
-    const phases = new Float32Array(COUNT);
-    const scales = new Float32Array(COUNT);
-    for (let i = 0; i < COUNT; i++) {
-      phases[i] = Math.random() * Math.PI * 2.0;
-      scales[i] = Math.random() * 1.4 + 0.6;
-    }
-    geometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
-    geometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
+      if (!mouseRef.current.active) {
+        animationId = requestAnimationFrame(draw);
+        return;
+      }
 
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0.0 },
-        uColor: { value: new THREE.Color(0xffffff) },
-      },
-      vertexShader: `
-        attribute float aScale;
-        attribute float aPhase;
-        uniform float uTime;
-        varying float vAlpha;
-        void main(){
-            vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-            float tw = 0.5 + 0.5 * sin(uTime * 3.0 + aPhase);
-            vAlpha = 0.25 + 0.45 * tw;
-            float size = aScale * 2.0 * (300.0 / -mvPos.z) * (0.6 + 0.6 * tw);
-            gl_PointSize = size;
-            gl_Position = projectionMatrix * mvPos;
+      const mx = smoothMouseRef.current.x;
+      const my = smoothMouseRef.current.y;
+      const cols = Math.ceil(width / GRID_SPACING) + 1;
+      const rows = Math.ceil(height / GRID_SPACING) + 1;
+      const offsetX = (width - (cols - 1) * GRID_SPACING) / 2;
+      const offsetY = (height - (rows - 1) * GRID_SPACING) / 2;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const x = offsetX + col * GRID_SPACING;
+          const y = offsetY + row * GRID_SPACING;
+          const dist = Math.hypot(x - mx, y - my);
+
+          if (dist > HOVER_RADIUS) continue;
+
+          const influence = 1 - dist / HOVER_RADIUS;
+          const visibility = smoothstep(0, 1, influence);
+          const radius = BASE_RADIUS + (MAX_RADIUS - BASE_RADIUS) * visibility;
+          const alpha = DOT_OPACITY * visibility;
+
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(160, 165, 175, ${alpha})`;
+          ctx.fill();
         }
-      `,
-      fragmentShader: `
-        uniform vec3 uColor;
-        varying float vAlpha;
-        void main(){
-            vec2 c = gl_PointCoord - vec2(0.5);
-            float r = length(c);
-            if(r > 0.5) discard;
-            float fade = smoothstep(0.5, 0.32, r);
-            gl_FragColor = vec4(uColor * fade, vAlpha * fade * 0.85);
-        }
-      `,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
+      }
 
-    const points = new THREE.Points(geometry, material);
-    group.add(points);
-    const clock = new THREE.Clock();
+      animationId = requestAnimationFrame(draw);
+    };
 
-    let targetX = 0,
-      targetY = 0;
+    const onPointerMove = (e: PointerEvent) => {
+      mouseRef.current.x = e.clientX;
+      mouseRef.current.y = e.clientY;
+      mouseRef.current.active = true;
+    };
 
-    function onPointerMove(e: PointerEvent) {
-      const x = (e.clientX / window.innerWidth) * 2 - 1;
-      const y = (e.clientY / window.innerHeight) * 2 - 1;
-      targetX = x * 0.6;
-      targetY = y * 0.6;
-    }
+    const onPointerLeave = () => {
+      mouseRef.current.active = false;
+    };
 
+    resize();
+    draw();
+
+    window.addEventListener('resize', resize);
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onPointerLeave);
 
-    function onResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-    window.addEventListener('resize', onResize);
-
-    let animationId: number;
-    function animate() {
-      animationId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-      if (material.uniforms) material.uniforms.uTime.value = t;
-      group.rotation.y += (targetX - group.rotation.y) * 0.05;
-      group.rotation.x += (targetY - group.rotation.x) * 0.05;
-      // clamp x rotation
-      group.rotation.x = Math.max(Math.min(group.rotation.x, 0.9), -0.9);
-      // slow auto-rotate
-      group.rotation.y += 0.0008;
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // Cleanup
     return () => {
       cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('resize', onResize);
-      renderer.dispose();
-      geometry.dispose();
-      material.dispose();
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
+      document.documentElement.removeEventListener('pointerleave', onPointerLeave);
     };
   }, []);
 
-  return <div ref={containerRef} id="container" />;
+  return (
+    <div id="container" className="fixed inset-0 z-0 pointer-events-none" aria-hidden>
+      <canvas ref={canvasRef} className="block h-full w-full" />
+    </div>
+  );
 }

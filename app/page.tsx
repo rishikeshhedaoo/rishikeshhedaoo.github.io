@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import Navigation from '@/components/Navigation';
 import StructuredData from '@/components/StructuredData';
 import CenterText from '@/components/CenterText';
+import SteelHoverText from '@/components/SteelHoverText';
 
 const ParticleScene = dynamic(() => import('@/components/ParticleScene'), {
   ssr: false,
@@ -23,11 +24,6 @@ export default function Home() {
   const [animationComplete, setAnimationComplete] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // For SCALABLE SYSTEMS hover effect
-  const [scaleMousePos, setScaleMousePos] = useState({ x: 0, y: 0 });
-  const [isScaleHovered, setIsScaleHovered] = useState(false);
-  const scaleTextRef = useRef<HTMLDivElement>(null);
 
   // For Services workflow interaction
   const [selectedService, setSelectedService] = useState<number | null>(null);
@@ -134,80 +130,33 @@ export default function Home() {
                   }}
                 />
 
-                {/* Main headline with BEHAVE-style outline */}
+                {/* Main headline with steel hover */}
                 <div style={{ marginBottom: '2rem' }}>
-                  <div
+                  <SteelHoverText
+                    as="div"
                     style={{
                       fontFamily: "'Audiowide', sans-serif",
                       fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
                       fontWeight: 400,
                       letterSpacing: '0.1em',
-                      WebkitTextStroke: '1.2px rgba(107, 114, 128, 0.7)',
-                      color: 'transparent',
                       lineHeight: 1.2,
                       marginBottom: '0.3rem',
                     }}
                   >
                     WE BUILD
-                  </div>
-                  {/* SCALABLE SYSTEMS with BEHAVE-like hover */}
-                  <div
-                    ref={scaleTextRef}
+                  </SteelHoverText>
+                  <SteelHoverText
                     style={{
-                      position: 'relative',
-                      display: 'inline-block',
-                      cursor: 'pointer',
+                      fontFamily: "'Audiowide', sans-serif",
+                      fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+                      fontWeight: 400,
+                      letterSpacing: '0.1em',
+                      lineHeight: 1.2,
                     }}
-                    onMouseMove={(e) => {
-                      if (scaleTextRef.current) {
-                        const rect = scaleTextRef.current.getBoundingClientRect();
-                        setScaleMousePos({
-                          x: e.clientX - rect.left,
-                          y: e.clientY - rect.top,
-                        });
-                      }
-                    }}
-                    onMouseEnter={() => setIsScaleHovered(true)}
-                    onMouseLeave={() => setIsScaleHovered(false)}
+                    circleSize={120}
                   >
-                    {/* Base outlined text */}
-                    <span
-                      style={{
-                        fontFamily: "'Audiowide', sans-serif",
-                        fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
-                        fontWeight: 400,
-                        letterSpacing: '0.1em',
-                        WebkitTextStroke: '1.2px rgba(107, 114, 128, 0.7)',
-                        color: 'transparent',
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      SCALABLE SYSTEMS
-                    </span>
-
-                    {/* Gradient overlay revealed on hover */}
-                    {isScaleHovered && (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          fontFamily: "'Audiowide', sans-serif",
-                          fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
-                          fontWeight: 400,
-                          letterSpacing: '0.1em',
-                          lineHeight: 1.2,
-                          background: 'linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #f7b731)',
-                          backgroundSize: '200% 100%',
-                          WebkitBackgroundClip: 'text',
-                          color: 'transparent',
-                          WebkitMaskImage: `radial-gradient(circle 80px at ${scaleMousePos.x}px ${scaleMousePos.y}px, black 0%, transparent 100%)`,
-                          maskImage: `radial-gradient(circle 80px at ${scaleMousePos.x}px ${scaleMousePos.y}px, black 0%, transparent 100%)`,
-                        }}
-                      >
-                        SCALABLE SYSTEMS
-                      </span>
-                    )}
-                  </div>
+                    SCALABLE SYSTEMS
+                  </SteelHoverText>
                 </div>
 
                 {/* Engaging description with creative layout */}
@@ -251,63 +200,19 @@ export default function Home() {
                     { num: '5+', label: 'YEARS' },
                     { num: '30+', label: 'CLIENTS' },
                   ].map((stat, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        cursor: 'pointer',
-                        transition: 'transform 0.3s ease',
-                        position: 'relative',
-                      }}
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        const overlay = e.currentTarget.querySelector('.stat-overlay') as HTMLElement;
-                        if (overlay) {
-                          overlay.style.opacity = '1';
-                          (overlay.style as any).maskImage = `radial-gradient(circle 60px at ${x}px ${y}px, black 0%, transparent 70%)`;
-                          (overlay.style as any).webkitMaskImage = `radial-gradient(circle 60px at ${x}px ${y}px, black 0%, transparent 70%)`;
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        const overlay = e.currentTarget.querySelector('.stat-overlay') as HTMLElement;
-                        if (overlay) overlay.style.opacity = '0';
-                        e.currentTarget.style.transform = 'scale(1)';
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.1)';
-                      }}
-                    >
-                      <div
+                    <div key={i} style={{ position: 'relative' }}>
+                      <SteelHoverText
+                        strokeWidth="1px"
+                        strokeColor="rgba(107, 114, 128, 0.6)"
+                        circleSize={70}
+                        scaleOnHover
                         style={{
                           fontFamily: "'Audiowide', sans-serif",
                           fontSize: '1.8rem',
-                          WebkitTextStroke: '1px rgba(107, 114, 128, 0.6)',
-                          color: 'transparent',
-                          transition: 'all 0.3s ease',
-                          position: 'relative',
                         }}
                       >
                         {stat.num}
-                        {/* Overlay with gradient - revealed by maskImage */}
-                        <span
-                          className="stat-overlay"
-                          style={{
-                            position: 'absolute',
-                            inset: 0,
-                            background: 'linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 33%, #45b7d1 66%, #f7b731 100%)',
-                            backgroundSize: '200% 100%',
-                            WebkitBackgroundClip: 'text',
-                            backgroundClip: 'text',
-                            color: 'transparent',
-                            opacity: 0,
-                            transition: 'opacity 0.2s ease',
-                            pointerEvents: 'none',
-                          }}
-                        >
-                          {stat.num}
-                        </span>
-                      </div>
+                      </SteelHoverText>
                       <div
                         style={{
                           fontFamily: "'Audiowide', sans-serif",
@@ -573,7 +478,7 @@ export default function Home() {
                         {/* CTA */}
                         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
                           <a
-                            href="mailto:hello@behave.studio"
+                            href="mailto:hello@behave.live"
                             style={{
                               fontFamily: "'Audiowide', sans-serif",
                               fontSize: '0.7rem',
@@ -595,56 +500,19 @@ export default function Home() {
                   // Service list view
                   return (
                     <>
-                      {/* Header with spotlight effect */}
-                      <div
-                        style={{ textAlign: 'center', marginBottom: '2.5rem', position: 'relative' }}
-                        onMouseMove={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const x = e.clientX - rect.left;
-                          const y = e.clientY - rect.top;
-                          const overlay = e.currentTarget.querySelector('.header-overlay') as HTMLElement;
-                          if (overlay) {
-                            overlay.style.opacity = '1';
-                            (overlay.style as any).maskImage = `radial-gradient(circle 100px at ${x}px ${y}px, black 0%, transparent 70%)`;
-                            (overlay.style as any).webkitMaskImage = `radial-gradient(circle 100px at ${x}px ${y}px, black 0%, transparent 70%)`;
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          const overlay = e.currentTarget.querySelector('.header-overlay') as HTMLElement;
-                          if (overlay) overlay.style.opacity = '0';
-                        }}
-                      >
-                        <div
+                      {/* Header with steel hover */}
+                      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                        <SteelHoverText
+                          strokeWidth="1px"
+                          circleSize={100}
                           style={{
                             fontFamily: "'Audiowide', sans-serif",
                             fontSize: 'clamp(1.3rem, 3.5vw, 2rem)',
                             letterSpacing: '0.12em',
-                            WebkitTextStroke: '1px rgba(107, 114, 128, 0.7)',
-                            color: 'transparent',
-                            position: 'relative',
-                            cursor: 'default',
                           }}
                         >
                           WHAT WE BUILD
-                          {/* Overlay with gradient - revealed by maskImage */}
-                          <span
-                            className="header-overlay"
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              background: 'linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 33%, #45b7d1 66%, #f7b731 100%)',
-                              backgroundSize: '200% 100%',
-                              WebkitBackgroundClip: 'text',
-                              backgroundClip: 'text',
-                              color: 'transparent',
-                              opacity: 0,
-                              transition: 'opacity 0.2s ease',
-                              pointerEvents: 'none',
-                            }}
-                          >
-                            WHAT WE BUILD
-                          </span>
-                        </div>
+                        </SteelHoverText>
                       </div>
 
                       {/* Service items */}
@@ -761,52 +629,46 @@ export default function Home() {
 
                 {/* Large outlined header */}
                 <div style={{ marginBottom: '3rem' }}>
-                  <div
+                  <SteelHoverText
+                    as="div"
+                    strokeWidth="1.5px"
                     style={{
                       fontFamily: "'Audiowide', sans-serif",
                       fontSize: 'clamp(2.5rem, 6vw, 4rem)',
                       fontWeight: 400,
                       letterSpacing: '0.1em',
-                      WebkitTextStroke: '1.5px rgba(107, 114, 128, 0.7)',
-                      color: 'transparent',
                       lineHeight: 1.2,
                     }}
                   >
                     SAY HELLO
-                  </div>
+                  </SteelHoverText>
                 </div>
 
-                {/* Email with engaging hover */}
-                <a
-                  href="mailto:hello@behave.studio"
+                {/* Email with steel hover */}
+                <div
                   style={{
-                    fontFamily: "'Audiowide', sans-serif",
-                    fontSize: 'clamp(1rem, 2vw, 1.4rem)',
-                    WebkitTextStroke: '1px rgba(107, 114, 128, 0.5)',
-                    color: 'transparent',
-                    textDecoration: 'none',
-                    letterSpacing: '0.15em',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '1rem',
-                    transition: 'all 0.4s ease',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget.style as any).webkitTextStroke = '0px';
-                    e.currentTarget.style.background = 'linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1)';
-                    (e.currentTarget.style as any).webkitBackgroundClip = 'text';
-                    e.currentTarget.style.color = 'transparent';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget.style as any).webkitTextStroke = '1px rgba(107, 114, 128, 0.5)';
-                    e.currentTarget.style.background = 'none';
-                    e.currentTarget.style.color = 'transparent';
                   }}
                 >
-                  hello@behave.studio
+                  <SteelHoverText
+                    as="a"
+                    href="mailto:hello@behave.live"
+                    strokeWidth="1px"
+                    strokeColor="rgba(107, 114, 128, 0.5)"
+                    circleSize={110}
+                    style={{
+                      fontFamily: "'Audiowide', sans-serif",
+                      fontSize: 'clamp(1rem, 2vw, 1.4rem)',
+                      letterSpacing: '0.15em',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    hello@behave.live
+                  </SteelHoverText>
                   <span style={{ fontSize: '1.2em', color: 'rgba(107, 114, 128, 0.4)' }}>→</span>
-                </a>
+                </div>
 
                 {/* Decorative line below */}
                 <div

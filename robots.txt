@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://rishikeshhedaoo.github.io/sitemap.xml
